@@ -18,7 +18,7 @@ func main() {
 	check(err)
 	defer f.Close()
 
-	f.WriteString("package directions\n")
+	f.WriteString("package instructions\n")
 
 	var b []byte
 	var pl pairList

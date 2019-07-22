@@ -1,4 +1,4 @@
-package directions
+package instructions
 
 import (
 	"io/ioutil"

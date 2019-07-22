@@ -1,4 +1,4 @@
-package directions
+package instructions
 
 var corpusDirections = []string{" (i ",
 	" 1 ",
