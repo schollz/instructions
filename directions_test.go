@@ -59,11 +59,8 @@ var ts = []URLDirections{
 }
 
 func TestTable(t *testing.T) {
-	log.SetLevel("info")
-	for i, t0 := range ts {
-		if i != 2 {
-			continue
-		}
+	log.SetLevel("trace")
+	for _, t0 := range ts {
 		fileToGet := t0.URL
 		fileToGet = strings.TrimPrefix(fileToGet, "https://")
 		if string(fileToGet[len(fileToGet)-1]) == "/" {

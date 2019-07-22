@@ -34,11 +34,11 @@ func getDirectionLinesInHTML(htmlS string) (lineInfos []string, err error) {
 			if isScript {
 				// try to capture JSON and if successful, do a hard exit
 				lis, errJSON := extractLinesFromJavascript(c.Data)
-				if errJSON == nil && len(lis) > 2 {
+				score, _ := scoreLines(lis)
+				if errJSON == nil && len(lis) > 2 && score > *bestScore {
 					log.Tracef("got ingredients from JSON")
+					*bestScore = score
 					*lineInfos = lis
-					done = true
-					return
 				}
 			}
 			var childText string
@@ -132,10 +132,9 @@ func parseArray(anArray []interface{}, lineInfo *[]string) {
 
 	score, li := scoreLines(concreteLines)
 	log.Trace(score, li)
-	if score > 20 {
+	if score > 10 {
 		*lineInfo = li
 	}
-
 	return
 }
 
@@ -156,7 +155,7 @@ func scoreLine(line string) (score int, lineInfo string) {
 	lineInfo = strings.TrimSpace(strings.ToLower(line))
 
 	if len(lineInfo) > 700 {
-		return
+		score = 700 - len(lineInfo)
 	}
 	if len(lineInfo) < 40 {
 		score = len(lineInfo) - 40
@@ -183,6 +182,11 @@ func scoreLine(line string) (score int, lineInfo string) {
 	if strings.ToUpper(firstChar) == firstChar {
 		score++
 	}
+
+	score -= strings.Count(lineInfo, ":")
+	score -= strings.Count(lineInfo, "<")
+	score -= strings.Count(lineInfo, ">")
+	score -= strings.Count(lineInfo, `"`)
 
 	lineInfo = strings.TrimSpace(line)
 	return
