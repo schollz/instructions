@@ -154,7 +154,7 @@ func scoreLines(lines []string) (score int, lineInfo []string) {
 func scoreLine(line string) (score int, lineInfo string) {
 	lineInfo = strings.TrimSpace(strings.ToLower(line))
 
-	if len(lineInfo) > 1000 {
+	if len(lineInfo) > 700 {
 		return
 	}
 	if len(lineInfo) < 40 {
