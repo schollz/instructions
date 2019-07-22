@@ -34,7 +34,7 @@ func getDirectionLinesInHTML(htmlS string) (lineInfos []string, err error) {
 			if isScript {
 				// try to capture JSON and if successful, do a hard exit
 				lis, errJSON := extractLinesFromJavascript(c.Data)
-				if errJSON == nil && len(lis) > 1 {
+				if errJSON == nil && len(lis) > 2 {
 					log.Tracef("got ingredients from JSON")
 					*lineInfos = lis
 					done = true
@@ -52,7 +52,8 @@ func getDirectionLinesInHTML(htmlS string) (lineInfos []string, err error) {
 				score += scoreOfLine
 			}
 		}
-		if score > *bestScore && len(childrenstring) < 15 && len(childrenstring) > 1 {
+		if score > *bestScore && len(childrenstring) < 15 && len(childrenstring) > 2 {
+			log.Tracef("score: %d, childs: ['%s']", score, strings.Join(childrenstring, "', '"))
 			*lineInfos = childrenstring
 			*bestScore = score
 			for _, child := range childrenstring {
@@ -158,19 +159,29 @@ func scoreLine(line string) (score int, lineInfo string) {
 		return
 	}
 	if len(lineInfo) < 40 {
+		score = len(lineInfo) - 40
 		return
 	}
 
+	pos := 0.0
 	for _, word := range corpusDirections {
-		if strings.Contains(line, word) {
-			score++
+		if strings.Contains(lineInfo, word) {
+			pos++
 		}
 	}
+	score += int(pos)
 
+	pos = 0.0
 	for _, word := range corpusDirectionsNeg {
-		if strings.Contains(line, word) {
-			score--
+		if strings.Contains(lineInfo, word) {
+			pos++
 		}
+	}
+	score -= int(pos)
+
+	firstChar := string(strings.TrimSpace(line)[0])
+	if strings.ToUpper(firstChar) == firstChar {
+		score++
 	}
 
 	lineInfo = strings.TrimSpace(line)
