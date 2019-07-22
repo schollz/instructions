@@ -157,8 +157,8 @@ func scoreLine(line string) (score int, lineInfo string) {
 	if len(lineInfo) > 1000 {
 		return
 	}
-	if len(lineInfo) > 400 {
-		score++
+	if len(lineInfo) < 40 {
+		return
 	}
 
 	for _, word := range corpusDirections {
