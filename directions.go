@@ -7,7 +7,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
+	"text/scanner"
+	"unicode"
 
 	log "github.com/schollz/logger"
 	"golang.org/x/net/html"
@@ -17,6 +20,29 @@ import (
 func Parse(htmlString string) (directions []string, err error) {
 	directions, err = getDirectionLinesInHTML(htmlString)
 	return
+}
+
+func removeDelimString(str string) string {
+	// alphanumeric (== [0-9A-Za-z])
+	// \s is a white space character
+	regExp := regexp.MustCompile(`[^[:alnum:]\s]`)
+	return regExp.ReplaceAllString(str, "")
+}
+
+func getUpperCaseChars(str string) []string {
+
+	tokens := removeDelimString(str)
+
+	var result []string
+
+	for _, char := range tokens {
+
+		if !unicode.IsLower(char) && char != ' ' {
+			result = append(result, scanner.TokenString(char))
+		}
+	}
+
+	return result
 }
 
 func getDirectionLinesInHTML(htmlS string) (lineInfos []string, err error) {
@@ -154,8 +180,8 @@ func scoreLines(lines []string) (score int, lineInfo []string) {
 func scoreLine(line string) (score int, lineInfo string) {
 	lineInfo = strings.TrimSpace(strings.ToLower(line))
 
-	if len(lineInfo) > 700 {
-		score = 700 - len(lineInfo)
+	if len(lineInfo) > 600 {
+		score = 600 - len(lineInfo)
 	}
 	if len(lineInfo) < 40 {
 		score = len(lineInfo) - 40
@@ -187,6 +213,13 @@ func scoreLine(line string) (score int, lineInfo string) {
 	score -= strings.Count(lineInfo, "<")
 	score -= strings.Count(lineInfo, ">")
 	score -= strings.Count(lineInfo, `"`)
+
+	if strings.Count(lineInfo, ".") == 0 {
+		score = 0
+	}
+	if len(getUpperCaseChars(line)) == 0 {
+		score = 0
+	}
 
 	lineInfo = strings.TrimSpace(line)
 	return
